@@ -2,6 +2,7 @@ package com.project.libraryapi.repository;
 
 import com.project.libraryapi.model.BookRepository;
 import com.project.libraryapi.model.entity.Book;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +39,6 @@ public class BookRepositoryTest {
 
         //verificação
         assertThat(exist).isTrue();
-
     }
 
     @Test
@@ -50,7 +52,18 @@ public class BookRepositoryTest {
 
         //verificação
         assertThat(exist).isFalse();
+    }
 
+    @Test
+    @DisplayName("Deve obter um livro por Id")
+    public void findByIdTest(){
+
+        Book book = createBook("123", "Fulano", "Viajando o mundo");
+        entityManager.persist(book);
+
+        Optional<Book> foundBook = repository.findById(book.getId());
+
+        assertThat(foundBook.isPresent()).isTrue();
     }
 
     private Book createBook(String isbn, String author, String title) {
