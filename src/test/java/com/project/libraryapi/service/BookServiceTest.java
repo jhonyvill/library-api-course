@@ -14,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -63,11 +65,46 @@ public class BookServiceTest {
         Mockito.verify(repository, Mockito.never()).save(book);
     }
 
+    @Test
+    @DisplayName("Deve obter um livro por Id")
+    public void getBookByIdTest(){
+        Book book = createBook();
+        book.setId(1L);
+        Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(Optional.of(book));
+
+        Optional<Book> foundBook = service.findById(1L);
+
+        assertThat(foundBook.isPresent()).isTrue();
+        assertThat(foundBook.get().getId()).isEqualTo(book.getId());
+        assertThat(foundBook.get().getIsbn()).isEqualTo(book.getIsbn());
+        assertThat(foundBook.get().getAuthor()).isEqualTo(book.getAuthor());
+        assertThat(foundBook.get().getTitle()).isEqualTo(book.getTitle());
+    }
+
+    @Test
+    @DisplayName("Deve retornar vazio quando não encontrar um livro por Id")
+    public void bookNotFoundByIdTest(){
+        Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+        Optional<Book> book = service.findById(1L);
+
+        assertThat(book.isPresent()).isFalse();
+    }
+
     private Book createBook() {
-        return Book.builder().isbn("1234").author("Artur").title("Viajando o mundo").build();
+        return Book.builder()
+                .isbn("1234")
+                .author("Artur")
+                .title("Viajando o mundo")
+                .build();
     }
 
     private Book createSavedBook(String isbn, String author, String title) {
-        return Book.builder().id(1L).isbn(isbn).author(author).title(title).build();
+        return Book.builder()
+                .id(1L)
+                .isbn(isbn)
+                .author(author)
+                .title(title)
+                .build();
     }
 }
