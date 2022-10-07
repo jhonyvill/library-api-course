@@ -28,4 +28,11 @@ public class BookServiceImpl implements BookService {
     public Optional<Book> findById(long id) {
         return repository.findById(id);
     }
+
+    @Override
+    public void delete(Book book) {
+        if (book == null || book.getId() == null)
+            throw new IllegalArgumentException("Livro não pode ser nulo.");
+        repository.delete(book);
+    }
 }
