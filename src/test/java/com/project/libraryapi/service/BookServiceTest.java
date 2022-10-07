@@ -111,6 +111,36 @@ public class BookServiceTest {
         Mockito.verify(repository, Mockito.never()).delete(book);
     }
 
+    @Test
+    @DisplayName("Deve atualizar um livro")
+    public void updateBookTest() {
+        Book bookToUpdate = createBook();
+        bookToUpdate.setId(1L);
+        Book updatedBook = createSavedBook("1234", "Artur", "Viajando o mundo");
+
+        Mockito.when(repository.save(bookToUpdate)).thenReturn(updatedBook);
+
+        Book book = service.updateBook(bookToUpdate);
+
+        assertThat(book.getId()).isEqualTo(updatedBook.getId());
+        assertThat(book.getAuthor()).isEqualTo(updatedBook.getAuthor());
+        assertThat(book.getTitle()).isEqualTo(updatedBook.getTitle());
+        assertThat(book.getIsbn()).isEqualTo(updatedBook.getIsbn());
+    }
+
+    @Test
+    @DisplayName("Erro ao tentar atualizar um livro inexistente")
+    public void updateInexistentBookTest(){
+        Book book = new Book();
+
+        Throwable exception = Assertions.catchThrowable(() -> service.updateBook(book));
+
+        assertThat(exception)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Livro não pode ser nulo.");
+        Mockito.verify(repository, Mockito.never()).save(book);
+    }
+
     private Book createBook() {
         return Book.builder()
                 .isbn("1234")

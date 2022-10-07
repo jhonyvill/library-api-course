@@ -35,4 +35,11 @@ public class BookServiceImpl implements BookService {
             throw new IllegalArgumentException("Livro não pode ser nulo.");
         repository.delete(book);
     }
+
+    @Override
+    public Book updateBook(Book book) {
+        if (book == null || book.getId() == null)
+            throw new IllegalArgumentException("Livro não pode ser nulo.");
+       return repository.save(book);
+    }
 }
