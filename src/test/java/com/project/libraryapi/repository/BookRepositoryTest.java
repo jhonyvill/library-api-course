@@ -6,6 +6,7 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -64,6 +65,27 @@ public class BookRepositoryTest {
         Optional<Book> foundBook = repository.findById(book.getId());
 
         assertThat(foundBook.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Deve salvar um livro")
+    public void saveBookTest(){
+        Book book = createBook("123", "Fulano", "Viajando o mundo");
+        Book savedBook = repository.save(book);
+
+        assertThat(savedBook.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Deve deletar um livro")
+    public void deleteBookTest(){
+        Book book = createBook("123", "Fulano", "Viajando o mundo");
+        Book savedBook = entityManager.persist(book);
+
+        repository.delete(savedBook);
+        Book foundBook = entityManager.find(Book.class, savedBook.getId());
+
+        assertThat(foundBook).isNull();
     }
 
     private Book createBook(String isbn, String author, String title) {
