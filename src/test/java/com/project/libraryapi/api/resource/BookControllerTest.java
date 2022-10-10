@@ -1,6 +1,5 @@
 package com.project.libraryapi.api.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.libraryapi.api.dto.BookDTO;
 import com.project.libraryapi.exception.BusinessException;
@@ -15,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -179,6 +182,33 @@ public class BookControllerTest {
 
         mvc.perform(request).andExpect(status().isNotFound());
         Mockito.verify(bookService, Mockito.never()).updateBook(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("Deve filtrar livros")
+    public void findBooktest() throws Exception{
+        Long id = 1L;
+        Book book = createBook(id,"Artur", "As Aventuras", "001");
+
+        BDDMockito.given(bookService.findByFilters(Mockito.any(Book.class), Mockito.any(Pageable.class)))
+                .willReturn(new PageImpl<Book>(Arrays.asList(book), PageRequest.of(0, 10), 1));
+
+        String queryString = String.format("?author=%s&title=%s&page=0&size=10",
+                book.getAuthor(), book.getTitle());
+
+        MockHttpServletRequestBuilder request = createGetQueryParamsRequest(queryString);
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("totalElements").value(1))
+                .andExpect(jsonPath("pageable.pageSize").value(10))
+                .andExpect(jsonPath("pageable.pageNumber").value(0));
+
+    }
+
+    private MockHttpServletRequestBuilder createGetQueryParamsRequest(String queryString) {
+        return MockMvcRequestBuilders.get(BOOK_API.concat(queryString)).accept(MediaType.APPLICATION_JSON);
     }
 
     private MockHttpServletRequestBuilder createPutRequest(Long id, String json) {
