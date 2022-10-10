@@ -10,6 +10,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -86,6 +90,28 @@ public class BookRepositoryTest {
         Book foundBook = entityManager.find(Book.class, savedBook.getId());
 
         assertThat(foundBook).isNull();
+    }
+
+    @Test
+    @DisplayName("Deve filtrar livros pelos parâmetros informados")
+    public void findBookByFiltersTest(){
+        Book book = Book.builder().author("Fulano").title("Viajando o mundo").build();
+        entityManager.persist(book);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        Example<Book> exampleBook = Example.of(book,
+                ExampleMatcher.matching()
+                        .withIgnoreCase()
+                        .withIgnoreNullValues()
+                        .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+
+        Page<Book> bookListResult = repository.findAll(exampleBook, pageRequest);
+
+        assertThat(bookListResult).isNotNull();
+        assertThat(bookListResult.getTotalElements()).isEqualTo(1);
+        assertThat(bookListResult.getContent().size()).isEqualTo(1);
+        assertThat(bookListResult.getContent().get(0).getTitle()).isEqualTo(book.getTitle());
+        assertThat(bookListResult.getPageable().getPageNumber()).isEqualTo(0);
+        assertThat(bookListResult.getPageable().getPageSize()).isEqualTo(10);
     }
 
     private Book createBook(String isbn, String author, String title) {

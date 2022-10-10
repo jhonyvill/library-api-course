@@ -1,5 +1,6 @@
 package com.project.libraryapi.service;
 
+import com.project.libraryapi.api.dto.BookDTO;
 import com.project.libraryapi.exception.BusinessException;
 import com.project.libraryapi.model.BookRepository;
 import com.project.libraryapi.model.entity.Book;
@@ -11,9 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -139,6 +143,27 @@ public class BookServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Livro não pode ser nulo.");
         Mockito.verify(repository, Mockito.never()).save(book);
+    }
+
+    @Test
+    @DisplayName("Deve filtrar livros pelos parâmetros informados")
+    public void findBookByFiltersTest(){
+        Book book = createBook();
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Book> bookList = Arrays.asList(book);
+        Page<Book> page = new PageImpl<Book>(bookList, pageRequest, 1);
+
+        Mockito.when(repository.findAll(Mockito.any(Example.class), Mockito.any(PageRequest.class)))
+                .thenReturn(page);
+
+        Page<Book> pageResult = service.findByFilters(book, pageRequest);
+
+        assertThat(pageResult.getTotalElements()).isEqualTo(1);
+        assertThat(pageResult.getContent()).isEqualTo(bookList);
+        assertThat(pageResult.getContent().size()).isEqualTo(1);
+        assertThat(pageResult.getContent().get(0).getTitle()).isEqualTo(book.getTitle());
+        assertThat(pageResult.getPageable().getPageNumber()).isEqualTo(0);
+        assertThat(pageResult.getPageable().getPageSize()).isEqualTo(10);
     }
 
     private Book createBook() {

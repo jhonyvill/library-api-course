@@ -4,14 +4,19 @@ import com.project.libraryapi.exception.BusinessException;
 import com.project.libraryapi.model.BookRepository;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.service.BookService;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 import java.util.Optional;
 
 @Service
 public class BookServiceImpl implements BookService {
 
-    BookRepository repository;
+    private final BookRepository repository;
 
     public BookServiceImpl(BookRepository repository) {
         this.repository = repository;
@@ -41,5 +46,15 @@ public class BookServiceImpl implements BookService {
         if (book == null || book.getId() == null)
             throw new IllegalArgumentException("Livro não pode ser nulo.");
        return repository.save(book);
+    }
+
+    @Override
+    public Page<Book> findByFilters(Book book, Pageable pageRequest) {
+        Example<Book> exampleBook = Example.of(book,
+                ExampleMatcher.matching()
+                        .withIgnoreCase()
+                        .withIgnoreNullValues()
+                        .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+        return repository.findAll(exampleBook, pageRequest);
     }
 }
