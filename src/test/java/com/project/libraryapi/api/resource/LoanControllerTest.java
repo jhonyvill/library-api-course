@@ -3,6 +3,7 @@ package com.project.libraryapi.api.resource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.libraryapi.api.dto.LoanDTO;
+import com.project.libraryapi.exception.BusinessException;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.model.entity.Loan;
 import com.project.libraryapi.service.BookService;
@@ -83,6 +84,25 @@ public class LoanControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("errors", Matchers.hasSize(1)))
             .andExpect(jsonPath("errors[0]").value("Book not found for passed isbn"));
+    }
+
+    @Test
+    @DisplayName("Deve retornar erro ao tentar fazer empréstimo de livro já emprestado")
+    public void borrowedBookLoanTest() throws Exception {
+        String isbn = "123";
+        LoanDTO loanDTO = createLoanDTO(isbn, "Fulano");
+        Book book = createBook(1L,"Fulano", "As Aventuras", isbn);
+
+        BDDMockito.given(bookService.findByIsbn(isbn)).willReturn(Optional.of(book));
+        BDDMockito.given(loanService.save(Mockito.any(Loan.class))).willThrow(new BusinessException("Book already borrowed"));
+
+        String json = new ObjectMapper().writeValueAsString(loanDTO);
+        MockHttpServletRequestBuilder request = createLoanPostRequest(json);
+
+        mvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors", Matchers.hasSize(1)))
+                .andExpect(jsonPath("errors[0]").value("Book already borrowed"));
     }
 
     private Loan createLoan(Long id, String customer, Book book, LocalDate date) {
