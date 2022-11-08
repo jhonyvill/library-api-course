@@ -57,4 +57,9 @@ public class BookServiceImpl implements BookService {
                         .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
         return repository.findAll(exampleBook, pageRequest);
     }
+
+    @Override
+    public Optional<Book> findByIsbn(String isbn) {
+        return Optional.empty();
+    }
 }
