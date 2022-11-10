@@ -1,6 +1,7 @@
 package com.project.libraryapi.api.resource;
 
 import com.project.libraryapi.api.dto.LoanDTO;
+import com.project.libraryapi.api.dto.ReturnedLoanDTO;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.model.entity.Loan;
 import com.project.libraryapi.service.BookService;
@@ -31,9 +32,21 @@ public class LoanController {
     public Long createLoan(@RequestBody LoanDTO loanDTO){
         Book book = bookService.findByIsbn(loanDTO.getIsbn())
                                                     .orElseThrow(() -> new ResponseStatusException (HttpStatus.BAD_REQUEST, "Book not found for passed isbn"));
-        Loan entity = Loan.builder().book(book).customer(loanDTO.getCustomer()).loanDate(LocalDate.now()).build();
-        entity = loanService.save(entity);
+        Loan entity = Loan.builder()
+                            .book(book)
+                            .customer(loanDTO.getCustomer())
+                            .loanDate(LocalDate.now())
+                            .build();
 
+        entity = loanService.save(entity);
         return entity.getId();
+    }
+
+    @PatchMapping("{id}")
+    public Loan updateLoan(@PathVariable Long id, @RequestBody ReturnedLoanDTO dto){
+        Loan foundLoan = loanService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        foundLoan.setReturned(dto.getReturned());
+        return loanService.update(foundLoan);
     }
 }
