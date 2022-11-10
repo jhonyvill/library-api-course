@@ -33,11 +33,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@WebMvcTest
+@WebMvcTest(controllers = BookController.class)
 @AutoConfigureMockMvc
 public class BookControllerTest {
 
-    static String BOOK_API = "/api/books";
+    static final String BOOK_API = "/api/books";
 
     @Autowired
     MockMvc mvc;
@@ -241,7 +241,7 @@ public class BookControllerTest {
         return BookDTO.builder().author(author).title(title).isbn(isbn).build();
     }
 
-    private Book createBook(Long id, String author, String title, String isbn) {
+    public static Book createBook(Long id, String author, String title, String isbn) {
         return Book.builder().id(id).author(author).title(title).isbn(isbn).build();
     }
 }

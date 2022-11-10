@@ -1,8 +1,6 @@
 package com.project.libraryapi.api.resource;
 
 import com.project.libraryapi.api.dto.BookDTO;
-import com.project.libraryapi.api.exception.ApiErrors;
-import com.project.libraryapi.exception.BusinessException;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.service.BookService;
 import org.modelmapper.ModelMapper;
@@ -10,8 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -86,16 +82,4 @@ public class BookController {
         return modelMapper.map(bookDTO, Book.class);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiErrors handleValidationExceptions(MethodArgumentNotValidException ex){
-        BindingResult bindingResult = ex.getBindingResult();
-        return new ApiErrors(bindingResult);
-    }
-
-    @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiErrors handleBusinessException(BusinessException ex){
-        return new ApiErrors(ex);
-    }
 }

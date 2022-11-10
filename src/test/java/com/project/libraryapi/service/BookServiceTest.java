@@ -1,8 +1,7 @@
 package com.project.libraryapi.service;
 
-import com.project.libraryapi.api.dto.BookDTO;
 import com.project.libraryapi.exception.BusinessException;
-import com.project.libraryapi.model.BookRepository;
+import com.project.libraryapi.model.repository.BookRepository;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.service.impl.BookServiceImpl;
 import org.assertj.core.api.Assertions;
@@ -64,7 +63,7 @@ public class BookServiceTest {
 
         assertThat(exception)
                 .isInstanceOf(BusinessException.class)
-                .hasMessage("ISBN já cadastrado");
+                .hasMessage("ISBN already registered.");
 
         Mockito.verify(repository, Mockito.never()).save(book);
     }
@@ -141,7 +140,7 @@ public class BookServiceTest {
 
         assertThat(exception)
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Livro não pode ser nulo.");
+                .hasMessage("Book cannot be null.");
         Mockito.verify(repository, Mockito.never()).save(book);
     }
 
@@ -166,7 +165,24 @@ public class BookServiceTest {
         assertThat(pageResult.getPageable().getPageSize()).isEqualTo(10);
     }
 
-    private Book createBook() {
+    @Test
+    @DisplayName("Deve buscar um livro por ISBN")
+    public void findByIsbnTest(){
+        Book book = createBook();
+        book.setId(1L);
+
+        Mockito.when(repository.findByIsbn(book.getIsbn())).thenReturn(Optional.of(book));
+
+        Optional<Book> foundBookResult = service.findByIsbn("1234");
+
+        assertThat(foundBookResult).isPresent();
+        assertThat(foundBookResult.get().getId()).isEqualTo(1L);
+        assertThat(foundBookResult.get().getIsbn()).isEqualTo(book.getIsbn());
+
+        Mockito.verify(repository, Mockito.times(1)).findByIsbn(book.getIsbn());
+    }
+
+    public static Book createBook() {
         return Book.builder()
                 .isbn("1234")
                 .author("Artur")
