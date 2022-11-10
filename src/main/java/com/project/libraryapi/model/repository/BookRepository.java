@@ -1,4 +1,4 @@
-package com.project.libraryapi.model;
+package com.project.libraryapi.model.repository;
 
 import com.project.libraryapi.model.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;

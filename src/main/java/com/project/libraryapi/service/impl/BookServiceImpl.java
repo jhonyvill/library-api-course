@@ -1,7 +1,7 @@
 package com.project.libraryapi.service.impl;
 
 import com.project.libraryapi.exception.BusinessException;
-import com.project.libraryapi.model.BookRepository;
+import com.project.libraryapi.model.repository.BookRepository;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.service.BookService;
 import org.springframework.data.domain.Example;
@@ -25,7 +25,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public Book save(Book book) {
         if(repository.existsByIsbn(book.getIsbn()))
-            throw new BusinessException("ISBN já cadastrado");
+            throw new BusinessException("ISBN already registered.");
         return repository.save(book);
     }
 
@@ -37,14 +37,14 @@ public class BookServiceImpl implements BookService {
     @Override
     public void delete(Book book) {
         if (book == null || book.getId() == null)
-            throw new IllegalArgumentException("Livro não pode ser nulo.");
+            throw new IllegalArgumentException("Book cannot be null.");
         repository.delete(book);
     }
 
     @Override
     public Book updateBook(Book book) {
         if (book == null || book.getId() == null)
-            throw new IllegalArgumentException("Livro não pode ser nulo.");
+            throw new IllegalArgumentException("Book cannot be null.");
        return repository.save(book);
     }
 

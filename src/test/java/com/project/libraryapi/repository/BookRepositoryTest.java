@@ -1,12 +1,10 @@
 package com.project.libraryapi.repository;
 
-import com.project.libraryapi.model.BookRepository;
+import com.project.libraryapi.model.repository.BookRepository;
 import com.project.libraryapi.model.entity.Book;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -37,7 +35,7 @@ public class BookRepositoryTest {
     public void returnTrueWhenExistISBN(){
         //cenário
         String isbn = "123";
-        entityManager.persist(createBook(isbn, "Fulano", "Viajando o mundo"));
+        entityManager.persist(createBook(isbn, "Kamilla", "Viajando o mundo"));
 
         //execução
         boolean exist = repository.existsByIsbn(isbn);
@@ -63,7 +61,7 @@ public class BookRepositoryTest {
     @DisplayName("Deve obter um livro por Id")
     public void findByIdTest(){
 
-        Book book = createBook("123", "Fulano", "Viajando o mundo");
+        Book book = createBook("123", "Kamilla", "Viajando o mundo");
         entityManager.persist(book);
 
         Optional<Book> foundBook = repository.findById(book.getId());
@@ -74,7 +72,7 @@ public class BookRepositoryTest {
     @Test
     @DisplayName("Deve salvar um livro")
     public void saveBookTest(){
-        Book book = createBook("123", "Fulano", "Viajando o mundo");
+        Book book = createBook("123", "Kamilla", "Viajando o mundo");
         Book savedBook = repository.save(book);
 
         assertThat(savedBook.getId()).isNotNull();
@@ -83,7 +81,7 @@ public class BookRepositoryTest {
     @Test
     @DisplayName("Deve deletar um livro")
     public void deleteBookTest(){
-        Book book = createBook("123", "Fulano", "Viajando o mundo");
+        Book book = createBook("123", "Kamilla", "Viajando o mundo");
         Book savedBook = entityManager.persist(book);
 
         repository.delete(savedBook);
@@ -95,7 +93,7 @@ public class BookRepositoryTest {
     @Test
     @DisplayName("Deve filtrar livros pelos parâmetros informados")
     public void findBookByFiltersTest(){
-        Book book = Book.builder().author("Fulano").title("Viajando o mundo").build();
+        Book book = Book.builder().author("Kamilla").title("Viajando o mundo").build();
         entityManager.persist(book);
         PageRequest pageRequest = PageRequest.of(0, 10);
         Example<Book> exampleBook = Example.of(book,
