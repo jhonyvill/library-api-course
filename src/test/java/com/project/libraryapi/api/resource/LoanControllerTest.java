@@ -2,7 +2,7 @@ package com.project.libraryapi.api.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.libraryapi.api.dto.LoanDTO;
-import com.project.libraryapi.api.dto.LoanFilterDTO;
+import com.project.libraryapi.api.dto.LoanInputDTO;
 import com.project.libraryapi.api.dto.ReturnedLoanDTO;
 import com.project.libraryapi.exception.BusinessException;
 import com.project.libraryapi.model.entity.Book;
@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -59,7 +58,7 @@ public class LoanControllerTest {
     @DisplayName("Deve criar um empréstimo")
     public void createLoanTest() throws Exception {
         String isbn = "123";
-        LoanDTO loanDTO = createLoanDTO(isbn, "Jhony");
+        LoanInputDTO loanDTO = createLoanDTO("123", "Jhony");
 
         Book book = createBook(1L,"Jhony", "As Aventuras", isbn);
         Loan loan = createLoan();
@@ -81,7 +80,7 @@ public class LoanControllerTest {
     @DisplayName("Deve retornar erro ao tentar fazer empréstimo de livro inexistente")
     public void createLoanInvalidIsbnTest() throws Exception {
         String isbn = "123";
-        LoanDTO loanDTO = createLoanDTO(isbn, "Fulano");
+        LoanInputDTO loanDTO = createLoanDTO("123", "Jhony");
 
         BDDMockito.given(bookService.findByIsbn(isbn)).willReturn(Optional.empty());
 
@@ -98,7 +97,7 @@ public class LoanControllerTest {
     @DisplayName("Deve retornar erro ao tentar fazer empréstimo de livro já emprestado")
     public void borrowedBookLoanTest() throws Exception {
         String isbn = "123";
-        LoanDTO loanDTO = createLoanDTO(isbn, "Fulano");
+        LoanInputDTO loanDTO = createLoanDTO("123", "Jhony");
         Book book = createBook(1L,"Fulano", "As Aventuras", isbn);
 
         BDDMockito.given(bookService.findByIsbn(isbn)).willReturn(Optional.of(book));
@@ -121,8 +120,8 @@ public class LoanControllerTest {
                 .content(json);
     }
 
-    private LoanDTO createLoanDTO(String isbn, String customer) {
-        return LoanDTO.builder().isbn(isbn).customer(customer).build();
+    private LoanInputDTO createLoanDTO(String isbn, String customer) {
+        return LoanInputDTO.builder().isbn(isbn).customer(customer).build();
     }
 
     @Test
@@ -168,7 +167,7 @@ public class LoanControllerTest {
         loan.setId(id);
         loan.setBook(book);
 
-        BDDMockito.given(loanService.find(Mockito.any(LoanFilterDTO.class), Mockito.any(Pageable.class)))
+        BDDMockito.given(loanService.find(Mockito.any(LoanInputDTO.class), Mockito.any(Pageable.class)))
                 .willReturn(new PageImpl<Loan>(Arrays.asList(loan), PageRequest.of(0, 10), 1));
 
         String queryString = String.format("?isbn=%s&customer=%s&page=0&size=10",

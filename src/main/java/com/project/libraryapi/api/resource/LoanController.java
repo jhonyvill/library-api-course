@@ -1,8 +1,7 @@
 package com.project.libraryapi.api.resource;
 
-import com.project.libraryapi.api.dto.BookDTO;
 import com.project.libraryapi.api.dto.LoanDTO;
-import com.project.libraryapi.api.dto.LoanFilterDTO;
+import com.project.libraryapi.api.dto.LoanInputDTO;
 import com.project.libraryapi.api.dto.ReturnedLoanDTO;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.model.entity.Loan;
@@ -36,7 +35,7 @@ public class LoanController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Long createLoan(@RequestBody LoanDTO loanDTO){
+    public Long createLoan(@RequestBody LoanInputDTO loanDTO){
         Book book = bookService.findByIsbn(loanDTO.getIsbn())
                                                     .orElseThrow(() -> new ResponseStatusException (HttpStatus.BAD_REQUEST, "Book not found for passed isbn"));
         Loan entity = Loan.builder()
@@ -58,7 +57,7 @@ public class LoanController {
     }
 
     @GetMapping
-    public Page<LoanDTO> find(LoanFilterDTO filterDTO, Pageable pageRequest){
+    public Page<LoanDTO> find(LoanInputDTO filterDTO, Pageable pageRequest){
         Page<Loan> result = loanService.find(filterDTO, pageRequest);
         List<LoanDTO> loans = result.getContent()
                                     .stream()

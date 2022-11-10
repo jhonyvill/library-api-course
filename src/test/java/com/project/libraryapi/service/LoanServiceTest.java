@@ -1,12 +1,11 @@
 package com.project.libraryapi.service;
 
-import com.project.libraryapi.api.dto.LoanFilterDTO;
+import com.project.libraryapi.api.dto.LoanInputDTO;
 import com.project.libraryapi.exception.BusinessException;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.model.entity.Loan;
 import com.project.libraryapi.model.repository.LoanRepository;
 import com.project.libraryapi.service.impl.LoanServiceImpl;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,7 +120,7 @@ public class LoanServiceTest {
 
         List<Loan> loans = List.of(loan);
         PageRequest pageRequest = PageRequest.of(0,10);
-        LoanFilterDTO loanFilterDTO = LoanFilterDTO.builder().isbn("123").customer("Jhony").build();
+        LoanInputDTO loanInputDTO = LoanInputDTO.builder().isbn("123").customer("Jhony").build();
         Page<Loan> page = new PageImpl<Loan>(loans, pageRequest, loans.size());
 
         Mockito.when(repository.findByBookIsbnOrCustomer(
@@ -131,7 +129,7 @@ public class LoanServiceTest {
                 Mockito.any(Pageable.class))).thenReturn(page);
 
         //execução
-        Page<Loan> pageResult = loanService.find(loanFilterDTO, pageRequest);
+        Page<Loan> pageResult = loanService.find(loanInputDTO, pageRequest);
 
         //validações
         assertThat(pageResult.getTotalElements()).isEqualTo(1);
