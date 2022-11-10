@@ -4,19 +4,18 @@ import com.project.libraryapi.exception.BusinessException;
 import com.project.libraryapi.model.entity.Book;
 import com.project.libraryapi.model.entity.Loan;
 import com.project.libraryapi.model.repository.LoanRepository;
-import com.project.libraryapi.service.impl.BookServiceImpl;
 import com.project.libraryapi.service.impl.LoanServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -39,16 +38,9 @@ public class LoanServiceTest {
     @Test
     @DisplayName("Deve salvar um empréstimo")
     public void saveLoanTest(){
-        String customer = "Jhony";
-        Loan loan = createLoan(customer);
-
-        Loan savedLoan = Loan.builder()
-                .id(1L)
-                .customer(customer)
-                .book(Book.builder().id(1L).build())
-                .loanDate(LocalDate.now())
-                .returned(false)
-                .build();
+        Loan loan = createLoan();
+        Loan savedLoan = createLoan();
+        savedLoan.setReturned(false);
 
         when(repository.existsByBookAndNotReturned(loan.getBook())).thenReturn(false);
         when(repository.save(loan)).thenReturn(savedLoan);
@@ -64,7 +56,7 @@ public class LoanServiceTest {
     @Test
     @DisplayName("Deve lançar erro de negócio ao salvar um empréstimo com livro já emprestado")
     public void borrowedBookSaveTest(){
-        Loan loan = createLoan("Jhony");
+        Loan loan = createLoan();
 
         when(repository.existsByBookAndNotReturned(loan.getBook())).thenReturn(true);
 
@@ -77,9 +69,45 @@ public class LoanServiceTest {
         verify(repository, never()).save(loan);
     }
 
-    private Loan createLoan(String customer) {
+    @Test
+    @DisplayName("Deve obter as informações de um empréstimo pelo ID")
+    public void findLoanByIdTest(){
+        long id = 1L;
+        Loan loan = createLoan();
+        loan.setId(id);
+
+        when(repository.findById(loan.getId())).thenReturn(Optional.of(loan));
+
+        Optional<Loan> result = loanService.findById(id);
+
+        assertThat(result.isPresent()).isTrue();
+        assertThat(result.get().getId()).isEqualTo(loan.getId());
+        assertThat(result.get().getCustomer()).isEqualTo(loan.getCustomer());
+        assertThat(result.get().getBook()).isEqualTo(loan.getBook());
+        assertThat(result.get().getLoanDate()).isEqualTo(loan.getLoanDate());
+
+        verify(repository).findById(loan.getId());
+    }
+
+    @Test
+    @DisplayName("Deve atualizar um empréstimo")
+    public void updateLoanTest(){
+        Loan loan = createLoan();
+        loan.setId(1L);
+        loan.setReturned(true);
+
+        when(repository.save(Mockito.any(Loan.class))).thenReturn(loan);
+
+        Loan updatedLoan = loanService.update(loan);
+
+        assertThat(updatedLoan.getReturned()).isTrue();
+        verify(repository).save(loan);
+
+    }
+
+    public static Loan createLoan() {
         return Loan.builder()
-                .customer(customer)
+                .customer("Jhony")
                 .book(Book.builder().id(1L).build())
                 .loanDate(LocalDate.now())
                 .build();
